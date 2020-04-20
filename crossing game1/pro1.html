@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Crossing Game</title>
+    <style type="text/css">
+        h1 {
+            text-align: center;
+        }
+
+        canvas {
+            border: 2px black;
+            background-image: url("img/floor.png")
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Crossing Game</h1>
+    <canvas id="myCanvas" width="1000" height="500"></canvas>
+
+    <script>
+        let canvas = document.getElementById("myCanvas");
+        let ctx = canvas.getContext('2d');
+        const screenWidth = 1000;
+        const screenHeight = 500;
+        const characterWidth = 35;
+        const caracterHeight = 35;
+
+        class GameCaracter {
+            constructor(x, y, width, height, color, speedh, speedv) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.color = color;
+                this.speedh = speedh;
+                this.speedv = speedv;
+                this.maxSpeed = 4;
+            }
+            moveHorizontally() {
+                if (this.x > screenWidth - this.width || this.x <= 0) {
+                    this.speedh *= -1;
+                }
+                this.x += this.speedh;
+            }
+            moveVertically() {
+                if (this.y > screenHeight - this.height || this.y <= 0) {
+                    this.speedv *= -1;
+                }
+                this.y += this.speedv;
+            }
+        }
+
+        let player = new GameCaracter(50, screenHeight / 2, characterWidth, caracterHeight, "rgb(0, 255, 0", 0, 0);
+        let enemys = [
+            new GameCaracter(110, 100, characterWidth, caracterHeight, "blue", 0, 2),
+            new GameCaracter(260, 100, characterWidth, caracterHeight, "red", 0, 3),
+            new GameCaracter(410, 100, characterWidth, caracterHeight, "rgb(238, 20, 200)", 0, 4),
+            new GameCaracter(560, 100, characterWidth, caracterHeight, "rgb(100, 200, 30)", 0, 5),
+            new GameCaracter(710, 100, characterWidth, caracterHeight, "rgb(50, 100, 20)", 0, 6)
+        ];
+        let target = new GameCaracter(950, screenHeight / 2, characterWidth, caracterHeight, "black", 0, 0);
+
+        document.addEventListener("keyup", (event) => {
+            player.speedh = 0;
+            player.speedv = 0;
+            //  console.log("key up", event)
+        });
+        document.addEventListener("keydown", (event) => {
+            const keyPressed = event.keyCode;
+            if (keyPressed === 39) {//right arrow
+                player.speedh = player.maxSpeed;
+            }
+            if (keyPressed === 37) {//left arrow
+                player.speedh = -player.maxSpeed;
+            }
+             if (keyPressed === 40) {// arrow
+                player.speedv = player.maxSpeed;
+            }
+             if (keyPressed === 38) {// arrow
+                player.speedv = -player.maxSpeed;
+            }
+            // console.log(keyPressed);
+        });
+
+        let checkCollision = (rect1, rect2) => {
+            let xOverlap = Math.abs(rect1.x - rect2.x) <=
+                (rect1.x < rect2.x ? rect1.width : rect2.width);
+
+            let yOverlap = Math.abs(rect1.y - rect2.y) <=
+                (rect1.y < rect2.y ? rect1.height : rect2.height);
+            return xOverlap && yOverlap;
+        }
+
+        let draw = function () {
+            ctx.clearRect(0, 0, screenWidth, screenHeight);
+            for (let enemy of enemys) {
+                // ctx.fillStyle = enemy.color;
+                // ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+                let img1 = new Image();
+                img1.src = 'img/enemy.png';
+                ctx.drawImage(img1, enemy.x, enemy.y);
+            }
+            // ctx.fillStyle = player.color;
+            // ctx.fillRect(player.x, player.y, player.width, player.height);
+            let img = new Image();
+            img.src = 'img/hero.png';
+            ctx.drawImage(img, player.x, player.y);
+
+            // ctx.fillStyle = target.color;
+            // ctx.fillRect(target.x, target.y, target.width, target.height);
+            let img2 = new Image();
+            img2.src = 'img/chest.png';
+            ctx.drawImage(img2, target.x, target.y);
+        }
+
+        let update = function () {
+            for (let enemy of enemys) {
+                if (checkCollision(player, enemy)) {
+                    endGame("You lose");
+
+                }
+                enemy.moveVertically();
+            }
+            player.moveHorizontally();
+            player.moveVertically();
+            // player.moveVertically();
+            if (checkCollision(player, target)) {
+                endGame("You won");
+                for(let enemy of enemys){
+                    enemy.speedh *= 1.5;
+                }
+                player.maxSpeed *=  1.2;
+            }
+        }
+
+        let endGame = (endText) => {
+            alert(endText);
+            player.x = 50;
+            player.speedh = 0;
+            player.speedv = 0;
+        }
+
+        let step = function () {
+            update();
+            draw();
+            window.requestAnimationFrame(step);
+        }
+        step();
+    </script>
+</body>
+
+</html>
