@@ -1,2 +1,2 @@
 # crossing-game
-learn javascript by simple game
+## My first project for learn basic html and Javascript😊 
